@@ -26,9 +26,9 @@ pub struct PlayerContract;
 
 #[contractimpl]
 impl PlayerContract {
-    /// Yeni oyuncu kaydı
+    //register new player
     pub fn register_player(env: Env, player: Address, username: String) -> Result<(), &'static str> {
-        // Oyuncu zaten kayıtlı mı kontrol et
+        // check if player is already registered
         if env.storage().instance().has(&DataKey::Player(player.clone())) {
             return Err("Player already registered");
         }
@@ -43,10 +43,10 @@ impl PlayerContract {
             last_activity: env.ledger().timestamp(),
         };
 
-        // Oyuncuyu kaydet
+        // save player
         env.storage().instance().set(&DataKey::Player(player.clone()), &new_player);
         
-        // Toplam oyuncu sayısını güncelle
+        // update total player count
         let mut player_count: u32 = env.storage().instance()
             .get(&DataKey::PlayerCount)
             .unwrap_or(0);
@@ -56,12 +56,12 @@ impl PlayerContract {
         Ok(())
     }
 
-    /// Oyuncu bilgilerini getir
+    // get player data
     pub fn get_player(env: Env, player: Address) -> Option<Player> {
         env.storage().instance().get(&DataKey::Player(player))
     }
 
-    /// Oyuncu deneyimini güncelle
+    // update player experience
     pub fn update_experience(env: Env, player: Address, exp_gained: u64) -> Result<(), &'static str> {
         let mut player_data = env.storage().instance()
             .get(&DataKey::Player(player.clone()))
@@ -70,7 +70,7 @@ impl PlayerContract {
         player_data.experience += exp_gained;
         player_data.last_activity = env.ledger().timestamp();
         
-        // Level hesapla (basit formül: her 1000 exp = 1 level)
+        // calculate level (simple formula: every 1000 exp = 1 level)
         let new_level = (player_data.experience / 1000) + 1;
         if new_level > player_data.level {
             player_data.level = new_level as u32;
@@ -80,7 +80,7 @@ impl PlayerContract {
         Ok(())
     }
 
-    /// Aktif maden ekle
+    // add active mine
     pub fn add_active_mine(env: Env, player: Address, mine_id: u32) -> Result<(), &'static str> {
         let mut player_data = env.storage().instance()
             .get(&DataKey::Player(player.clone()))
@@ -93,7 +93,7 @@ impl PlayerContract {
         Ok(())
     }
 
-    /// Toplam madencilik miktarını güncelle
+    // update total mining amount
     pub fn update_total_mined(env: Env, player: Address, amount: u64) -> Result<(), &'static str> {
         let mut player_data = env.storage().instance()
             .get(&DataKey::Player(player.clone()))
@@ -106,12 +106,12 @@ impl PlayerContract {
         Ok(())
     }
 
-    /// Toplam oyuncu sayısını getir
+    // get total player count
     pub fn get_player_count(env: Env) -> u32 {
         env.storage().instance().get(&DataKey::PlayerCount).unwrap_or(0)
     }
 
-    /// Oyuncunun aktif olup olmadığını kontrol et (son 24 saat)
+    // Is player active? (Last 24 hours)
     pub fn is_player_active(env: Env, player: Address) -> bool {
         if let Some(player_data) = env.storage().instance().get(&DataKey::Player(player)) {
             let current_time = env.ledger().timestamp();

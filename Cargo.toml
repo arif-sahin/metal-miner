@@ -1,10 +1,9 @@
-[workspace]
-resolver = "2"
-members = [
-  "contracts/*",
-]
+[package]
+name = "metal-miner"
+version = "0.1.0"
+edition = "2021"
 
-[workspace.dependencies]
+[dependencies]
 soroban-sdk = "22.0.0"
 
 [profile.release]
